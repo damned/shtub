@@ -1,6 +1,6 @@
 package shtub;
 
 public class ShtubException extends RuntimeException {
-    public ShtubException(Exception e, String s, String serverDescription, int serverPort) {
+    public ShtubException(Exception e, String messageFormat, Object... parameters) {
     }
 }
