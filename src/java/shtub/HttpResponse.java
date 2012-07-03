@@ -32,11 +32,6 @@ public class HttpResponse {
     }
 
     public boolean copyTo(HttpServletResponse outputResponse) throws Exception {
-
-//        outputResponse.setStatus(status());
-//        copyHeadersTo(outputResponse);
-//        IOUtils.copy(new StringReader(body()), outputResponse.getWriter());
-
         outputResponse.setStatus(status());
         copyHeadersTo(outputResponse);
         writeBodyTo(outputResponse.getOutputStream());
@@ -49,6 +44,9 @@ public class HttpResponse {
     }
 
     public byte[] bodyBytes() throws Exception {
+        if (response.getEntity() == null) {
+            return new byte[0];
+        }
         return EntityUtils.toByteArray(response.getEntity());
     }
 

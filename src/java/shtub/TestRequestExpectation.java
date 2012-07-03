@@ -36,8 +36,8 @@ public class TestRequestExpectation implements RequestHandler {
         this.responseMimeType = mimeType;
     }
 
-    public boolean handle(String requestUriWithParams, HttpServletRequest request, HttpServletResponse response) throws IOException {
-        if (requestMatchesExpectation(requestUriWithParams, request)) {
+    public boolean handle(Url url, HttpServletRequest request, HttpServletResponse response) throws IOException {
+        if (requestMatchesExpectation(url.withoutHost(), request)) {
             respond(response, this);
             return true;
         }
@@ -45,7 +45,7 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     private boolean requestMatchesExpectation(String requestUriWithParams, HttpServletRequest request) {
-        return matchAnyRequest || (requestUriWithParams.matches(requestMatchDescription()) && parametersMatch(request));
+        return matchAnyRequest || (requestUriWithParams.equals(expectedPath) && parametersMatch(request));
     }
 
     private boolean parametersMatch(HttpServletRequest request) {

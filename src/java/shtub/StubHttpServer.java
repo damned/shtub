@@ -89,10 +89,10 @@ public class StubHttpServer {
             @Override
             public void service(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
             	
-                String requestUri = null;
+                Url requestUri = null;
 				try {
-					requestUri = composeQueryUriWithParams(request);
-					log.info("Handling get to [" + requestUri + "]");
+                    requestUri = Url.urlFrom(request);
+					log.info("Handling get to [%s]", requestUri);
 					for (RequestHandler handler : handlers) {
                         if (handler.handle(requestUri, request, response)) {
 					        indicateRequestHandled(request);
@@ -104,13 +104,7 @@ public class StubHttpServer {
 					log.error(t, "StubHttpServer blew up for request path '%s'", requestUri);
 				}
                 handleUnmatchedRequest(response);
-            }
-
-            private String composeQueryUriWithParams(HttpServletRequest request) {
-                if (request.getQueryString() != null) {
-                    return request.getRequestURI() + "?" + request.getQueryString();
-                }
-                return request.getRequestURI();
+                indicateRequestHandled(request);
             }
 
             private void indicateRequestHandled(HttpServletRequest request) {
@@ -139,21 +133,21 @@ public class StubHttpServer {
         return threadPool;
     }
 
-    public RequestExpectation expectRequestTo(String path) {
-        RequestExpectation expectation = new RequestExpectation();
+    public TestRequestExpectation expectRequestTo(String path) {
+        TestRequestExpectation expectation = new TestRequestExpectation();
         expectation.withPath(path);
         addExpectation(expectation);
         return expectation;
     }
 
-    public RequestExpectation matchAnyRequest() {
-        RequestExpectation expectation = new RequestExpectation();
+    public TestRequestExpectation matchAnyRequest() {
+        TestRequestExpectation expectation = new TestRequestExpectation();
         expectation.matchAnyRequest();
         addExpectation(expectation);
         return expectation;
     }
 
-    private void addExpectation(RequestExpectation expectation) {
+    private void addExpectation(TestRequestExpectation expectation) {
         handlers.add(expectation);
     }
 

@@ -4,5 +4,5 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 public interface RequestHandler {
-    boolean handle(String requestUriWithParams, HttpServletRequest request, HttpServletResponse response) throws Exception;
+    boolean handle(Url requestUriWithParams, HttpServletRequest request, HttpServletResponse response) throws Exception;
 }

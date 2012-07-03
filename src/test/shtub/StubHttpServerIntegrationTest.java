@@ -31,7 +31,7 @@ public class StubHttpServerIntegrationTest {
     public void gives_canned_text_response_to_any_request() throws Exception {
         server.matchAnyRequest().andRespondWith("Hello, World", "text/plain");
 
-        response = client.get("http://localhost:" + SERVER_PORT + "/whatever");
+        response = client.get(serverUrl("/whatever"));
 
         assertThat(response.body(), is("Hello, World"));
         assertThat(response.contentType(), is("text/plain"));
@@ -42,8 +42,9 @@ public class StubHttpServerIntegrationTest {
     public void gives_specified_response_to_specific_path_request() throws Exception {
         server.expectRequestTo("/correcto").andRespondWith("right path");
 
-        response = client.get("http://localhost:" + SERVER_PORT + "/correcto");
+        response = client.get(serverUrl("/correcto"));
 
+        assertThat(response.status(), is(200));
         assertThat(response.body(), is("right path"));
     }
 
@@ -51,9 +52,13 @@ public class StubHttpServerIntegrationTest {
     public void gives_404_response_to_specific_path_request() throws Exception {
         server.expectRequestTo("/correcto").andRespondWith("right path");
 
-        response = client.get("http://localhost:1091/in_no_way_correcto");
+        response = client.get(serverUrl("/in_no_way_correcto"));
 
         assertThat(response.status(), is(404));
         assertThat(response.body(), not("right path"));
+    }
+
+    private String serverUrl(String path) {
+        return "http://localhost:" + SERVER_PORT + path;
     }
 }
