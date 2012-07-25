@@ -1,5 +1,7 @@
 package shtub;
 
+import shtub.requests.AnyRequestMatcher;
+import shtub.requests.RequestMatcher;
 import shtub.responses.BinaryResponse;
 import shtub.responses.NoBodyResponse;
 import shtub.responses.Response;
@@ -19,6 +21,8 @@ public class TestRequestExpectation implements RequestHandler {
 
     private List<Parameter> parameters = new ArrayList<Parameter>();
 
+    private RequestMatcher matcher;
+
     private Response response = Response.NULL;
 
     public TestRequestExpectation withPath(String path) {
@@ -32,6 +36,7 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     public void matchAnyRequest() {
+        matcher = new AnyRequestMatcher();
         this.matchAnyRequest = true;
     }
 
@@ -60,7 +65,11 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     private boolean requestMatchesExpectation(String requestUriWithParams, HttpServletRequest request) {
-        return matchAnyRequest || (requestUriWithParams.equals(expectedPath) && parametersMatch(request));
+        return matchesAnyRequest() || (requestUriWithParams.equals(expectedPath) && parametersMatch(request));
+    }
+
+    private boolean matchesAnyRequest() {
+        return matchAnyRequest;
     }
 
     private boolean parametersMatch(HttpServletRequest request) {
@@ -79,7 +88,7 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     private String requestMatchDescription() {
-        if (matchAnyRequest) {
+        if (matchesAnyRequest()) {
             return "matching any request";
         }
         return expectedPath;
@@ -89,7 +98,7 @@ public class TestRequestExpectation implements RequestHandler {
     public String toString() {
         return "RequestExpectation [expectedPath=" + requestMatchDescription()
                 + ", responseRedirectDestination="
-                + ", matchAnyRequest=" + matchAnyRequest + "]";
+                + ", matchAnyRequest=" + matchesAnyRequest() + "]";
     }
 
     private class Parameter {
