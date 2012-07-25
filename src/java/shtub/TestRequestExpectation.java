@@ -2,7 +2,7 @@ package shtub;
 
 import org.apache.commons.io.IOUtils;
 import shtub.responses.BinaryResponse;
-import shtub.responses.Response;
+import shtub.responses.NoBodyResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,7 +24,7 @@ public class TestRequestExpectation implements RequestHandler {
 
     private List<Parameter> parameters = new ArrayList<Parameter>();
     private BinaryResponse binaryResponse;
-    private Response response;
+    private NoBodyResponse noBodyResponse;
 
     public void matchAnyRequest() {
         this.matchAnyRequest = true;
@@ -65,7 +65,11 @@ public class TestRequestExpectation implements RequestHandler {
     private void respond(HttpServletResponse response) throws IOException {
         log.info("Responding to request for [" + requestMatchDescription() + "]");
 
-        if (responseBodyBytes() != null) {
+        if (noBodyResponse != null) {
+            log.debug("Responding with '%d' and no body", statusCode);
+            response.setStatus(statusCode);
+        }
+        else if (responseBodyBytes() != null) {
             log.debug("Responding with '%d' and body '%s'", statusCode, new String(responseBodyBytes()));
             response.setStatus(statusCode);
             copyContentsToResponse(response, new ByteArrayInputStream(responseBodyBytes()));
@@ -120,7 +124,7 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     public void andRespondWithoutBody(int statusCode) {
-        responseBodyBytes = new byte[0];
+        noBodyResponse = new NoBodyResponse(statusCode);
         this.statusCode = statusCode;
     }
 
