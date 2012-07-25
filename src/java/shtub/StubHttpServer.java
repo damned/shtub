@@ -140,6 +140,13 @@ public class StubHttpServer {
         return expectation;
     }
 
+    public TestRequestExpectation expectQueryTo(String uriWithParams) {
+        TestRequestExpectation expectation = new TestRequestExpectation();
+        expectation.withPathAndQuery(uriWithParams);
+        addExpectation(expectation);
+        return expectation;
+    }
+
     public TestRequestExpectation matchAnyRequest() {
         TestRequestExpectation expectation = new TestRequestExpectation();
         expectation.matchAnyRequest();

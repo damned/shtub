@@ -86,7 +86,7 @@ public class ProxyServerIntegrationTest {
     public void passes_on_get_query_parameters_to_proxied_server() throws Exception {
         String uriWithParams = "/get?foo=bar&sna=fu";
 
-        server.expectRequestTo(uriWithParams).andRespondWith("all the info");
+        server.expectQueryTo(uriWithParams).andRespondWith("all the info");
 
         response = requestWithProxy(uriWithParams);
 

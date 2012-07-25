@@ -3,14 +3,28 @@ package shtub;
 import javax.servlet.http.HttpServletRequest;
 
 public class Url {
-    private HttpServletRequest request;
+    private String queryString;
+    private String requestUri;
+    private String requestUrl;
+
+    public Url(String uriWithParams) {
+        String[] pathAndParams = uriWithParams.split("\\?");
+        requestUrl = requestUri = pathAndParams[0];
+        queryString = pathAndParams[1];
+    }
 
     public static Url urlFrom(HttpServletRequest request) {
         return new Url(request);
     }
 
+    public static Url fromPathAndParams(String uriWithParams) {
+        return new Url(uriWithParams);
+    }
+
     private Url(HttpServletRequest request) {
-        this.request = request;
+        requestUrl = request.getRequestURL().toString();
+        requestUri = request.getRequestURI();
+        queryString = request.getQueryString();
     }
 
     public String withoutHost() {
@@ -18,15 +32,15 @@ public class Url {
     }
 
     public String withoutHostOrQueryString() {
-        return request.getRequestURI();
+        return requestUri;
     }
 
     public String withHost() {
-        return compose(request.getRequestURL().toString());
+        return compose(requestUrl);
     }
 
     private String queryParameters() {
-        return request.getQueryString();
+        return queryString;
     }
 
     private String compose(String baseUri) {

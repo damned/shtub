@@ -1,9 +1,6 @@
 package shtub;
 
-import shtub.requests.AnyRequestMatcher;
-import shtub.requests.NoRequestMatcher;
-import shtub.requests.ParameterMatcher;
-import shtub.requests.RequestMatcher;
+import shtub.requests.*;
 import shtub.responses.BinaryResponse;
 import shtub.responses.NoBodyResponse;
 import shtub.responses.Response;
@@ -19,19 +16,23 @@ public class TestRequestExpectation implements RequestHandler {
 
     private String expectedPath;
 
-    private List<ParameterMatcher> parameterMatchers = new ArrayList<ParameterMatcher>();
+    private List<RequestMatcher> matchers = new ArrayList<RequestMatcher>();
 
     private RequestMatcher matcher = new NoRequestMatcher();
 
     private Response response = Response.NULL;
 
     public TestRequestExpectation withPath(String path) {
-        this.expectedPath = path;
+        this.matchers.add(new PathMatcher(path));
         return this;
     }
 
+    public void withPathAndQuery(String uriWithParams) {
+        this.matchers.add(new PathAndParametersMatcher(uriWithParams));
+    }
+
     public TestRequestExpectation withParameter(String name, String value) {
-        parameterMatchers.add(new ParameterMatcher(name, value));
+        matchers.add(new ParameterMatcher(name, value));
         return this;
     }
 
@@ -56,24 +57,24 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     public boolean handle(Url url, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if (requestMatchesExpectation(url, request)) {
+        if (requestMatchesExpectation(request)) {
             respond(response);
             return true;
         }
         return false;
     }
 
-    private boolean requestMatchesExpectation(Url url, HttpServletRequest request) {
-        return matcher.matches(request) || (url.withoutHostOrQueryString().equals(expectedPath) && parametersMatch(request));
+    private boolean requestMatchesExpectation(HttpServletRequest request) {
+        return matcher.matches(request) || matches(request);
     }
 
-    private boolean parametersMatch(HttpServletRequest request) {
-        return matches(request, parameterMatchers);
+    private boolean matches(HttpServletRequest request) {
+        return matches(request, matchers);
     }
 
-    private boolean matches(HttpServletRequest request, List<ParameterMatcher> parameterMatchers) {
-        for (ParameterMatcher matcher : parameterMatchers) {
-            if (! matcher.isIn(request)) {
+    private boolean matches(HttpServletRequest request, List<RequestMatcher> matchers) {
+        for (RequestMatcher matcher : matchers) {
+            if (!matcher.matches(request)) {
                 return false;
             }
         }
@@ -99,5 +100,4 @@ public class TestRequestExpectation implements RequestHandler {
                 + ", responseRedirectDestination="
                 + ", matchAnyRequest=" + matcher.matches(null) + "]";
     }
-
 }
