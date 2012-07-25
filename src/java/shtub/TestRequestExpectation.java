@@ -58,19 +58,23 @@ public class TestRequestExpectation implements RequestHandler {
         return true;
     }
 
-    private void respond(HttpServletResponse response) throws IOException {
+    private void respond(HttpServletResponse servletResponse) throws IOException {
         log.info("Responding to request for [" + requestMatchDescription() + "]");
 
         if (noBodyResponse != null) {
-            log.debug("Responding with '%d' and no body", statusCode);
-            response.setStatus(statusCode);
+            respondUsing(servletResponse);
         }
         else if (responseBodyBytes() != null) {
             log.debug("Responding with '%d' and body '%s'", statusCode, new String(responseBodyBytes()));
-            response.setStatus(statusCode);
-            copyContentsToResponse(response, new ByteArrayInputStream(responseBodyBytes()), binaryResponse.mimeType());
+            servletResponse.setStatus(statusCode);
+            copyContentsToResponse(servletResponse, new ByteArrayInputStream(responseBodyBytes()), binaryResponse.mimeType());
         }
         log.debug("Responded to request");
+    }
+
+    private void respondUsing(HttpServletResponse servletResponse) {
+        log.debug("Responding with '%d' and no body", noBodyResponse.statusCode());
+        servletResponse.setStatus(noBodyResponse.statusCode());
     }
 
     private byte[] responseBodyBytes() {
