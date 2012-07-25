@@ -62,7 +62,7 @@ public class TestRequestExpectation implements RequestHandler {
         log.info("Responding to request for [" + requestMatchDescription() + "]");
 
         if (noBodyResponse != null) {
-            respondUsing(servletResponse);
+            noBodyResponse.respondVia(servletResponse);
         }
         else if (responseBodyBytes() != null) {
             log.debug("Responding with '%d' and body '%s'", statusCode, new String(responseBodyBytes()));
@@ -70,11 +70,6 @@ public class TestRequestExpectation implements RequestHandler {
             copyContentsToResponse(servletResponse, new ByteArrayInputStream(responseBodyBytes()), binaryResponse.mimeType());
         }
         log.debug("Responded to request");
-    }
-
-    private void respondUsing(HttpServletResponse servletResponse) {
-        log.debug("Responding with '%d' and no body", noBodyResponse.statusCode());
-        servletResponse.setStatus(noBodyResponse.statusCode());
     }
 
     private byte[] responseBodyBytes() {
