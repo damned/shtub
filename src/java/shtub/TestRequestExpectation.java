@@ -1,15 +1,11 @@
 package shtub;
 
-import org.apache.commons.io.IOUtils;
 import shtub.responses.BinaryResponse;
 import shtub.responses.NoBodyResponse;
 import shtub.responses.Response;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,7 +15,6 @@ public class TestRequestExpectation implements RequestHandler {
     private String expectedPath;
 
     private boolean matchAnyRequest;
-    private int statusCode = 200;
 
     private List<Parameter> parameters = new ArrayList<Parameter>();
     private BinaryResponse binaryResponse;
@@ -38,7 +33,7 @@ public class TestRequestExpectation implements RequestHandler {
         binaryResponse = new BinaryResponse(responseBody.getBytes(), mimeType);
     }
 
-    public boolean handle(Url url, HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public boolean handle(Url url, HttpServletRequest request, HttpServletResponse response) throws Exception {
         if (requestMatchesExpectation(url.withoutHost(), request)) {
             respond(response);
             return true;
@@ -59,22 +54,16 @@ public class TestRequestExpectation implements RequestHandler {
         return true;
     }
 
-    private void respond(HttpServletResponse servletResponse) throws IOException {
+    private void respond(HttpServletResponse servletResponse) throws Exception {
         log.info("Responding to request for [" + requestMatchDescription() + "]");
 
         if (response != null) {
             response.respondVia(servletResponse);
         }
-        else if (responseBodyBytes() != null) {
-            log.debug("Responding with '%d' and body '%s'", statusCode, new String(responseBodyBytes()));
-            servletResponse.setStatus(statusCode);
-            copyContentsToResponse(servletResponse, new ByteArrayInputStream(responseBodyBytes()), binaryResponse.mimeType());
+        else if (binaryResponse != null) {
+            binaryResponse.respondVia(servletResponse);
         }
         log.debug("Responded to request");
-    }
-
-    private byte[] responseBodyBytes() {
-        return binaryResponse.bytes();
     }
 
     private String requestMatchDescription() {
@@ -84,26 +73,12 @@ public class TestRequestExpectation implements RequestHandler {
         return expectedPath;
     }
 
-    private void copyContentsToResponse(HttpServletResponse response, InputStream responseData, String responseMimeType) throws IOException {
-        if (responseMimeType != null) {
-            response.setContentType(responseMimeType);
-        }
-        try {
-            IOUtils.copy(responseData, response.getOutputStream());
-            response.setStatus(statusCode);
-        }
-        finally {
-            IOUtils.closeQuietly(responseData);
-        }
-    }
-
     @Override
     public String toString() {
         return "RequestExpectation [expectedPath=" + requestMatchDescription()
                 + ", binaryResponse=" + binaryResponse
                 + ", responseRedirectDestination="
-                + ", matchAnyRequest=" + matchAnyRequest
-                + ", statusCode=" + statusCode + "]";
+                + ", matchAnyRequest=" + matchAnyRequest + "]";
     }
 
 
