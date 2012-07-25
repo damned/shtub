@@ -16,7 +16,6 @@ public class TestRequestExpectation implements RequestHandler {
     private final Logger log = Logger.getLogger(TestRequestExpectation.class);
 
     private String expectedPath;
-    private String responseMimeType;
 
     private boolean matchAnyRequest;
     private int statusCode = 200;
@@ -36,7 +35,6 @@ public class TestRequestExpectation implements RequestHandler {
 
     public void andRespondWith(String responseBody, String mimeType) {
         binaryResponse = new BinaryResponse(responseBody.getBytes(), mimeType);
-        this.responseMimeType = binaryResponse.mimeType();
     }
 
     public boolean handle(Url url, HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -70,7 +68,7 @@ public class TestRequestExpectation implements RequestHandler {
         else if (responseBodyBytes() != null) {
             log.debug("Responding with '%d' and body '%s'", statusCode, new String(responseBodyBytes()));
             response.setStatus(statusCode);
-            copyContentsToResponse(response, new ByteArrayInputStream(responseBodyBytes()));
+            copyContentsToResponse(response, new ByteArrayInputStream(responseBodyBytes()), binaryResponse.mimeType());
         }
         log.debug("Responded to request");
     }
@@ -86,7 +84,7 @@ public class TestRequestExpectation implements RequestHandler {
         return expectedPath;
     }
 
-    private void copyContentsToResponse(HttpServletResponse response, InputStream responseData) throws IOException {
+    private void copyContentsToResponse(HttpServletResponse response, InputStream responseData, String responseMimeType) throws IOException {
         if (responseMimeType != null) {
             response.setContentType(responseMimeType);
         }
@@ -102,8 +100,7 @@ public class TestRequestExpectation implements RequestHandler {
     @Override
     public String toString() {
         return "RequestExpectation [expectedPath=" + requestMatchDescription()
-                + ", responseMimeType=" + responseMimeType
-                + ", responseBody=" + new String(responseBodyBytes())
+                + ", binaryResponse=" + binaryResponse
                 + ", responseRedirectDestination="
                 + ", matchAnyRequest=" + matchAnyRequest
                 + ", statusCode=" + statusCode + "]";
@@ -116,8 +113,6 @@ public class TestRequestExpectation implements RequestHandler {
 
     public void andRespondWith(byte[] bytes, String mimeType) {
         binaryResponse = new BinaryResponse(bytes, mimeType);
-
-        responseMimeType = mimeType;
     }
 
     public void andRespondWithoutBody(int statusCode) {
