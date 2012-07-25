@@ -70,6 +70,19 @@ public class StubHttpServerIntegrationTest {
         assertThat(response.body(), is("that's the way we roll"));
     }
 
+    @Test
+    public void gives_no_response_when_not_all_parameters_match() throws Exception {
+        server.expectRequestTo("/query")
+                .withParameter("foo", "bar")
+                .withParameter("sna", "fu")
+                .andRespondWith("that's the way we roll");
+
+        response = client.get(serverUrl("/query?foo=bar"));
+
+        assertThat(response.status(), is(404));
+        assertThat(response.body(), not("that's the way we roll"));
+    }
+
     private String serverUrl(String path) {
         return "http://localhost:" + SERVER_PORT + path;
     }
