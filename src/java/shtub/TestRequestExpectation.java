@@ -41,7 +41,7 @@ public class TestRequestExpectation implements RequestHandler {
 
     public boolean handle(Url url, HttpServletRequest request, HttpServletResponse response) throws IOException {
         if (requestMatchesExpectation(url.withoutHost(), request)) {
-            respond(response, this);
+            respond(response);
             return true;
         }
         return false;
@@ -60,15 +60,19 @@ public class TestRequestExpectation implements RequestHandler {
         return true;
     }
 
-    private void respond(HttpServletResponse response, TestRequestExpectation requestExpectation) throws IOException {
+    private void respond(HttpServletResponse response) throws IOException {
         log.info("Responding to request for [" + requestMatchDescription() + "]");
 
-        if (requestExpectation.responseBodyBytes != null) {
-            log.debug("Responding with '%d' and body '%s'", statusCode, new String(responseBodyBytes));
+        if (responseBodyBytes() != null) {
+            log.debug("Responding with '%d' and body '%s'", statusCode, new String(responseBodyBytes()));
             response.setStatus(statusCode);
-            copyContentsToResponse(response, new ByteArrayInputStream(responseBodyBytes));
+            copyContentsToResponse(response, new ByteArrayInputStream(responseBodyBytes()));
         }
         log.debug("Responded to request");
+    }
+
+    private byte[] responseBodyBytes() {
+        return responseBodyBytes;
     }
 
     private String requestMatchDescription() {
@@ -95,7 +99,7 @@ public class TestRequestExpectation implements RequestHandler {
     public String toString() {
         return "RequestExpectation [expectedPath=" + requestMatchDescription()
                 + ", responseMimeType=" + responseMimeType
-                + ", responseBody=" + new String(responseBodyBytes)
+                + ", responseBody=" + new String(responseBodyBytes())
                 + ", responseRedirectDestination="
                 + ", matchAnyRequest=" + matchAnyRequest
                 + ", statusCode=" + statusCode + "]";
