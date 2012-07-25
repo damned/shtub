@@ -58,6 +58,18 @@ public class StubHttpServerIntegrationTest {
         assertThat(response.body(), not("right path"));
     }
 
+    @Test
+    public void gives_response_when_parameters_match() throws Exception {
+        server.expectRequestTo("/query")
+                .withParameter("foo", "bar")
+                .andRespondWith("that's the way we roll");
+
+        response = client.get(serverUrl("/query?foo=bar&sna=fu"));
+
+        assertThat(response.status(), is(200));
+        assertThat(response.body(), is("that's the way we roll"));
+    }
+
     private String serverUrl(String path) {
         return "http://localhost:" + SERVER_PORT + path;
     }

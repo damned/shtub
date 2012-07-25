@@ -14,7 +14,11 @@ public class Url {
     }
 
     public String withoutHost() {
-        return compose(request.getRequestURI());
+        return compose(withoutHostOrQueryString());
+    }
+
+    public String withoutHostOrQueryString() {
+        return request.getRequestURI();
     }
 
     public String withHost() {

@@ -55,19 +55,24 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     public boolean handle(Url url, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if (requestMatchesExpectation(url.withoutHost(), request)) {
+        if (requestMatchesExpectation(url, request)) {
             respond(response);
             return true;
         }
         return false;
     }
 
-    private boolean requestMatchesExpectation(String requestUriWithParams, HttpServletRequest request) {
-        return matcher.matches(request) || (requestUriWithParams.equals(expectedPath) && parametersMatch(request));
+    private boolean requestMatchesExpectation(Url url, HttpServletRequest request) {
+        return matcher.matches(request) || (url.withoutHostOrQueryString().equals(expectedPath) && parametersMatch(request));
     }
 
     private boolean parametersMatch(HttpServletRequest request) {
-        for (Parameter parameter : parameters) {
+        List<Parameter> parametersToMatch = parameters;
+        return matches(request, parametersToMatch);
+    }
+
+    private boolean matches(HttpServletRequest request, List<Parameter> parametersToMatch) {
+        for (Parameter parameter : parametersToMatch) {
             if (! parameter.isIn(request)) {
                 return false;
             }
