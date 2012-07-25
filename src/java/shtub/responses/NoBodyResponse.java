@@ -13,12 +13,8 @@ public class NoBodyResponse implements Response {
         this.statusCode = statusCode;
     }
 
-    public Integer statusCode() {
-        return statusCode;
-    }
-
     public void respondVia(HttpServletResponse servletResponse) {
-        log.debug("Responding with '%d' and no body", statusCode());
-        servletResponse.setStatus(statusCode());
+        log.debug("Responding with '%d' and no body", statusCode);
+        servletResponse.setStatus(statusCode);
     }
 }

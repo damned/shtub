@@ -3,6 +3,7 @@ package shtub;
 import shtub.responses.BinaryResponse;
 import shtub.responses.NoBodyResponse;
 import shtub.responses.Response;
+import shtub.responses.StringResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -35,11 +36,11 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     public void andRespondWith(String responseBody, String mimeType) {
-        response = new BinaryResponse(responseBody.getBytes(), mimeType);
+        response = new StringResponse(responseBody, mimeType);
     }
 
     public void andRespondWith(String s) {
-        andRespondWith(s, "text/plain");
+        response = new StringResponse(s, "text/plain");
     }
 
     public void andRespondWith(byte[] bytes, String mimeType) {

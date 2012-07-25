@@ -12,6 +12,7 @@ public class BinaryResponse implements Response {
     private final Logger log = Logger.getLogger(BinaryResponse.class);
     private byte[] bytes;
     private String mimeType;
+
     private int statusCode = 200;
 
     public BinaryResponse(byte[] bytes, String mimeType) {
@@ -19,24 +20,15 @@ public class BinaryResponse implements Response {
         this.mimeType = mimeType;
     }
 
-    public byte[] bytes() {
-        return bytes;
-    }
-
-    public String mimeType() {
-        return mimeType;
-    }
-
     public void respondVia(HttpServletResponse servletResponse) throws Exception {
-        byte[] bytes = bytes();
         log.debug("Responding with '%d' and body '%s'", statusCode, new String(bytes));
         servletResponse.setStatus(statusCode);
-        copyContentsToResponse(servletResponse, new ByteArrayInputStream(bytes), mimeType(), statusCode);
+        copyContentsToResponse(servletResponse, new ByteArrayInputStream(bytes), statusCode);
     }
 
-    public void copyContentsToResponse(HttpServletResponse response, InputStream responseData, String responseMimeType, int statusCode) throws IOException {
-        if (responseMimeType != null) {
-            response.setContentType(responseMimeType);
+    private void copyContentsToResponse(HttpServletResponse response, InputStream responseData, int statusCode) throws IOException {
+        if (mimeType != null) {
+            response.setContentType(mimeType);
         }
         try {
             IOUtils.copy(responseData, response.getOutputStream());
