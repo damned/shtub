@@ -1,6 +1,6 @@
 package shtub.responses;
 
-public class BinaryResponse {
+public class BinaryResponse implements Response {
     private byte[] bytes;
     private String mimeType;
 
