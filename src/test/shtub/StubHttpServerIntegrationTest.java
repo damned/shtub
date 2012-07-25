@@ -59,6 +59,13 @@ public class StubHttpServerIntegrationTest {
     }
 
     @Test
+    public void gives_404_response_if_no_expectations_set() throws Exception {
+        response = client.get(serverUrl("/any-old-path"));
+
+        assertThat(response.status(), is(404));
+    }
+
+    @Test
     public void gives_response_when_parameters_match() throws Exception {
         server.expectRequestTo("/query")
                 .withParameter("foo", "bar")

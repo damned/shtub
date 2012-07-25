@@ -14,11 +14,7 @@ import java.util.List;
 public class TestRequestExpectation implements RequestHandler {
     private final Logger log = Logger.getLogger(TestRequestExpectation.class);
 
-    private String expectedPath;
-
     private List<RequestMatcher> matchers = new ArrayList<RequestMatcher>();
-
-    private RequestMatcher matcher = new NoRequestMatcher();
 
     private Response response = Response.NULL;
 
@@ -27,8 +23,9 @@ public class TestRequestExpectation implements RequestHandler {
         return this;
     }
 
-    public void withPathAndQuery(String uriWithParams) {
+    public TestRequestExpectation withPathAndQuery(String uriWithParams) {
         this.matchers.add(new PathAndParametersMatcher(uriWithParams));
+        return this;
     }
 
     public TestRequestExpectation withParameter(String name, String value) {
@@ -37,7 +34,7 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     public void matchAnyRequest() {
-        matcher = new AnyRequestMatcher();
+        matchers.add(new AnyRequestMatcher());
     }
 
     public void andRespondWith(String responseBody, String mimeType) {
@@ -57,19 +54,11 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     public boolean handle(Url url, HttpServletRequest request, HttpServletResponse response) throws Exception {
-        if (requestMatchesExpectation(request)) {
+        if (matches(request, matchers)) {
             respond(response);
             return true;
         }
         return false;
-    }
-
-    private boolean requestMatchesExpectation(HttpServletRequest request) {
-        return matcher.matches(request) || matches(request);
-    }
-
-    private boolean matches(HttpServletRequest request) {
-        return matches(request, matchers);
     }
 
     private boolean matches(HttpServletRequest request, List<RequestMatcher> matchers) {
@@ -88,16 +77,23 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     private String requestMatchDescription() {
-        if (matcher.matches(null)) {
-            return "matching any request";
+        if (matchers.isEmpty()) {
+            return "matching no requests";
         }
-        return expectedPath;
+        return description(matchers);
+    }
+
+    private String description(List<RequestMatcher> matchers) {
+        StringBuilder all = new StringBuilder();
+        for (RequestMatcher matcher : matchers) {
+            all.append(matcher.toString());
+            all.append("   ");
+        }
+        return all.toString();
     }
 
     @Override
     public String toString() {
-        return "RequestExpectation [expectedPath=" + requestMatchDescription()
-                + ", responseRedirectDestination="
-                + ", matchAnyRequest=" + matcher.matches(null) + "]";
+        return "RequestExpectation [matching=" + requestMatchDescription() + "]";
     }
 }
