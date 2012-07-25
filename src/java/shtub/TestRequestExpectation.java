@@ -1,6 +1,7 @@
 package shtub;
 
 import org.apache.commons.io.IOUtils;
+import shtub.responses.BinaryResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,6 +22,7 @@ public class TestRequestExpectation implements RequestHandler {
     private byte[] responseBodyBytes;
 
     private List<Parameter> parameters = new ArrayList<Parameter>();
+    private BinaryResponse binaryResponse;
 
     public void matchAnyRequest() {
         this.matchAnyRequest = true;
@@ -32,8 +34,9 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     public void andRespondWith(String responseBody, String mimeType) {
-        this.responseBodyBytes = responseBody.getBytes();
-        this.responseMimeType = mimeType;
+        binaryResponse = new BinaryResponse(responseBody.getBytes(), mimeType);
+        this.responseBodyBytes = binaryResponse.bytes();
+        this.responseMimeType = binaryResponse.mimeType();
     }
 
     public boolean handle(Url url, HttpServletRequest request, HttpServletResponse response) throws IOException {
