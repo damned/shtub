@@ -1,8 +1,6 @@
 shtub - http stubbing for tests
 
-testing shtub proxy:
-
--- testing system using shtub to stub http dependency --
+testing system using shtub to stub http dependency:
 
 in Graphviz dot format, SUT == System Under Test:
 
