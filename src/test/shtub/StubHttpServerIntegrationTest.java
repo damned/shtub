@@ -66,7 +66,7 @@ public class StubHttpServerIntegrationTest {
     }
 
     @Test
-    public void gives_response_when_parameters_match() throws Exception {
+    public void gives_response_when_parameters_present() throws Exception {
         server.expectRequestTo("/query")
                 .withParameter("foo", "bar")
                 .andRespondWith("that's the way we roll");
