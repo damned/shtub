@@ -1,4 +1,7 @@
 package shtub.requests;
 
-public class RequestMatcher implements Matcher {
+import javax.servlet.http.HttpServletRequest;
+
+public interface RequestMatcher {
+    boolean matches(HttpServletRequest request);
 }

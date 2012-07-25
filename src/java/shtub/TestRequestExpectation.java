@@ -1,6 +1,7 @@
 package shtub;
 
 import shtub.requests.AnyRequestMatcher;
+import shtub.requests.NoRequestMatcher;
 import shtub.requests.RequestMatcher;
 import shtub.responses.BinaryResponse;
 import shtub.responses.NoBodyResponse;
@@ -17,11 +18,9 @@ public class TestRequestExpectation implements RequestHandler {
 
     private String expectedPath;
 
-    private boolean matchAnyRequest;
-
     private List<Parameter> parameters = new ArrayList<Parameter>();
 
-    private RequestMatcher matcher;
+    private RequestMatcher matcher = new NoRequestMatcher();
 
     private Response response = Response.NULL;
 
@@ -37,7 +36,6 @@ public class TestRequestExpectation implements RequestHandler {
 
     public void matchAnyRequest() {
         matcher = new AnyRequestMatcher();
-        this.matchAnyRequest = true;
     }
 
     public void andRespondWith(String responseBody, String mimeType) {
@@ -65,11 +63,7 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     private boolean requestMatchesExpectation(String requestUriWithParams, HttpServletRequest request) {
-        return matchesAnyRequest() || (requestUriWithParams.equals(expectedPath) && parametersMatch(request));
-    }
-
-    private boolean matchesAnyRequest() {
-        return matchAnyRequest;
+        return matcher.matches(request) || (requestUriWithParams.equals(expectedPath) && parametersMatch(request));
     }
 
     private boolean parametersMatch(HttpServletRequest request) {
@@ -88,7 +82,7 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     private String requestMatchDescription() {
-        if (matchesAnyRequest()) {
+        if (matcher.matches(null)) {
             return "matching any request";
         }
         return expectedPath;
@@ -98,7 +92,7 @@ public class TestRequestExpectation implements RequestHandler {
     public String toString() {
         return "RequestExpectation [expectedPath=" + requestMatchDescription()
                 + ", responseRedirectDestination="
-                + ", matchAnyRequest=" + matchesAnyRequest() + "]";
+                + ", matchAnyRequest=" + matcher.matches(null) + "]";
     }
 
     private class Parameter {
