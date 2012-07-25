@@ -18,7 +18,7 @@ public class TestRequestExpectation implements RequestHandler {
 
     private List<Parameter> parameters = new ArrayList<Parameter>();
 
-    private Response response;
+    private Response response = Response.NULL;
 
     public TestRequestExpectation withPath(String path) {
         this.expectedPath = path;
@@ -73,10 +73,7 @@ public class TestRequestExpectation implements RequestHandler {
 
     private void respond(HttpServletResponse servletResponse) throws Exception {
         log.info("Responding to request for [" + requestMatchDescription() + "]");
-
-        if (response != null) {
-            response.respondVia(servletResponse);
-        }
+        response.respondVia(servletResponse);
         log.debug("Responded to request");
     }
 
