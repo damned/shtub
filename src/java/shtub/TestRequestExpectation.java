@@ -17,20 +17,37 @@ public class TestRequestExpectation implements RequestHandler {
     private boolean matchAnyRequest;
 
     private List<Parameter> parameters = new ArrayList<Parameter>();
-    private BinaryResponse binaryResponse;
-    private Response response;
 
-    public void matchAnyRequest() {
-        this.matchAnyRequest = true;
-    }
+    private Response response;
 
     public TestRequestExpectation withPath(String path) {
         this.expectedPath = path;
         return this;
     }
 
+    public TestRequestExpectation withParameter(String name, String value) {
+        parameters.add(new Parameter(name, value));
+        return this;
+    }
+
+    public void matchAnyRequest() {
+        this.matchAnyRequest = true;
+    }
+
     public void andRespondWith(String responseBody, String mimeType) {
-        binaryResponse = new BinaryResponse(responseBody.getBytes(), mimeType);
+        response = new BinaryResponse(responseBody.getBytes(), mimeType);
+    }
+
+    public void andRespondWith(String s) {
+        andRespondWith(s, "text/plain");
+    }
+
+    public void andRespondWith(byte[] bytes, String mimeType) {
+        response = new BinaryResponse(bytes, mimeType);
+    }
+
+    public void andRespondWithoutBody(int statusCode) {
+        response = new NoBodyResponse(statusCode);
     }
 
     public boolean handle(Url url, HttpServletRequest request, HttpServletResponse response) throws Exception {
@@ -60,9 +77,6 @@ public class TestRequestExpectation implements RequestHandler {
         if (response != null) {
             response.respondVia(servletResponse);
         }
-        else if (binaryResponse != null) {
-            binaryResponse.respondVia(servletResponse);
-        }
         log.debug("Responded to request");
     }
 
@@ -76,27 +90,8 @@ public class TestRequestExpectation implements RequestHandler {
     @Override
     public String toString() {
         return "RequestExpectation [expectedPath=" + requestMatchDescription()
-                + ", binaryResponse=" + binaryResponse
                 + ", responseRedirectDestination="
                 + ", matchAnyRequest=" + matchAnyRequest + "]";
-    }
-
-
-    public void andRespondWith(String s) {
-        andRespondWith(s, "text/plain");
-    }
-
-    public void andRespondWith(byte[] bytes, String mimeType) {
-        binaryResponse = new BinaryResponse(bytes, mimeType);
-    }
-
-    public void andRespondWithoutBody(int statusCode) {
-        response = new NoBodyResponse(statusCode);
-    }
-
-    public TestRequestExpectation withParameter(String name, String value) {
-        parameters.add(new Parameter(name, value));
-        return this;
     }
 
     private class Parameter {
