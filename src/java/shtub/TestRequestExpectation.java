@@ -20,7 +20,6 @@ public class TestRequestExpectation implements RequestHandler {
 
     private boolean matchAnyRequest;
     private int statusCode = 200;
-    private byte[] responseBodyBytes;
 
     private List<Parameter> parameters = new ArrayList<Parameter>();
     private BinaryResponse binaryResponse;
@@ -37,7 +36,6 @@ public class TestRequestExpectation implements RequestHandler {
 
     public void andRespondWith(String responseBody, String mimeType) {
         binaryResponse = new BinaryResponse(responseBody.getBytes(), mimeType);
-        this.responseBodyBytes = binaryResponse.bytes();
         this.responseMimeType = binaryResponse.mimeType();
     }
 
@@ -78,7 +76,7 @@ public class TestRequestExpectation implements RequestHandler {
     }
 
     private byte[] responseBodyBytes() {
-        return responseBodyBytes;
+        return binaryResponse.bytes();
     }
 
     private String requestMatchDescription() {
@@ -119,7 +117,6 @@ public class TestRequestExpectation implements RequestHandler {
     public void andRespondWith(byte[] bytes, String mimeType) {
         binaryResponse = new BinaryResponse(bytes, mimeType);
 
-        responseBodyBytes = bytes;
         responseMimeType = mimeType;
     }
 
